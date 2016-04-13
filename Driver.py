@@ -8,9 +8,11 @@
     @Date: 4/11/2016
     @Version: 1.0
 """
+from __future__ import print_function
 import numpy as np
 import sys
 import time
+
 
 '''
     main -Default main function for driver class.
@@ -35,7 +37,7 @@ def main(cmd_args):
     print(m)
     '''
     end_time = time.time()
-    print('Runtime: %f seconds' % (end_time - start_time))
+    print('Initialization Runtime: %f seconds' % (end_time - start_time))
     print('%f ratings per movie' % (num_ratings / num_movies))
     start_time = time.time()
     #Index = a matrix of just user index and movie index (ratings are trimmed)
@@ -44,10 +46,10 @@ def main(cmd_args):
     #Sort by the movie index? Why are we doing this?
     data = data[index, :]
 
-    #Why are we adding one here?
+    #Why are we adding one here? Is this because the index is zero based?
     num_movies = np.max(data[:, 1], axis=0) + 1
     print('%d movies' % num_movies)
-    #The statement below removes sparse data and replaces missing data with what exactly?
+    #The statement below initializes an np column vector with all zero's
     h = np.zeros((num_movies, 1))
 
     '''
@@ -55,7 +57,9 @@ def main(cmd_args):
     '''
     k0 = 0
     for j in range(num_movies):
-        print('%5.1f%%' % (100 * j / num_movies), end='\r')
+        #print('%5.1f%%' % (100 * j / num_movies), end='\r')
+        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / num_movies))
+        #sys.stdout.flush()
         k1 = k0 + 1
         while k1 < len(data) and data[k1, 1] == j:
             k1 += 1
@@ -70,17 +74,19 @@ def main(cmd_args):
     #    j = row[1]
     #    h[j] += 1
 
-    j = np.argmin(h, axis=0)
-    print('%d ratings for movie %d' % (h[j], j))
+    #j = np.argmin(h, axis=0)
+    #print('%d ratings for movie %d' % (h[j], j))
     end_time = time.time()
-    print('Runtime: %f seconds' % (end_time - start_time))
+    print('\nTotal Runtime: %f seconds' % (end_time - start_time))
 
     '''
     Start SVD Netflix Recommendation System Code:
     '''
+    i = 0
     for user in data[:, 0]:
-        for rating in user:
+        for rating in data[i]:
             pass
+        i += 1
 
 
 if __name__ == '__main__':
