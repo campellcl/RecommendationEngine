@@ -26,7 +26,7 @@ def main(cmd_args):
     num_ratings = len(data)
     num_movies = np.max(data[:, 1], axis=0)
     start_time = time.time()
-    movie_matrix_mean = np.mean(data[:,2])
+    movie_matrix_mean = np.mean(data[:, 2])
     '''
     m = 0
     for row in data:
@@ -38,15 +38,21 @@ def main(cmd_args):
     print('Runtime: %f seconds' % (end_time - start_time))
     print('%f ratings per movie' % (num_ratings / num_movies))
     start_time = time.time()
+    #Index = a matrix of just user index and movie index (ratings are trimmed)
+    #The np.lexsort() line appears to sort an 'n' dimensional matrix in ascending order after transposition.
     index = np.lexsort(data[:, :2].T)
+    #Sort by the movie index? Why are we doing this?
     data = data[index, :]
 
-
+    #Why are we adding one here?
     num_movies = np.max(data[:, 1], axis=0) + 1
     print('%d movies' % num_movies)
-
+    #The statement below removes sparse data and replaces missing data with what exactly?
     h = np.zeros((num_movies, 1))
 
+    '''
+    What is the below code doing?
+    '''
     k0 = 0
     for j in range(num_movies):
         print('%5.1f%%' % (100 * j / num_movies), end='\r')
@@ -69,6 +75,13 @@ def main(cmd_args):
     end_time = time.time()
     print('Runtime: %f seconds' % (end_time - start_time))
 
+    '''
+    Start SVD Netflix Recommendation System Code:
+    '''
+    for user in data[:, 0]:
+        for rating in user:
+            pass
+
+
 if __name__ == '__main__':
     main(sys.argv)
-
