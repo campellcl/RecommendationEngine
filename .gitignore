@@ -48,3 +48,7 @@ Temporary Items
 *.xml
 .idea/.name
 *.iml
+metadata.json
+test.npy
+train.npy
+validation.npy
