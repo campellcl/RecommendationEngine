@@ -80,6 +80,18 @@ def main(cmd_args):
     print('\nTotal Runtime: %f seconds' % (end_time - start_time))
 
     '''
+    # Sort Data by movie then user (j then i)
+    index = np.lexsort(data[:, :2].T)
+    data = data[index, :]
+    '''
+
+    '''
+    # Sort Data by user then movie (i then j)
+    index = np.lexsort(data[:, 1::-1].T)
+    data = data[index, :]
+    '''
+
+    '''
     Start SVD Netflix Recommendation System Code:
     '''
     i = 0
@@ -87,7 +99,6 @@ def main(cmd_args):
         for rating in data[i]:
             pass
         i += 1
-
 
 if __name__ == '__main__':
     main(sys.argv)
