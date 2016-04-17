@@ -81,9 +81,10 @@ def main(cmd_args):
             k1 += 1
         # get the mean rating for a given user. Some users rate higher than others.
         h[j] = np.mean(pu[k0:k1, 2])
+        # get the mean rating for a given movie. Some movies are rated higher than others.
         l[j] = np.mean(pv[k0:k1, 2])
         k0 = k1
-
+    print("\n")
     #for j in range(num_movies):
     #    index = data[:, 1] == j
     #    h[j] = len(data[index, :])
@@ -94,17 +95,15 @@ def main(cmd_args):
 
     #j = np.argmin(h, axis=0)
     #print('%d ratings for movie %d' % (h[j], j))
-    end_time = time.time()
-    print('\nTotal Runtime: %f seconds' % (end_time - start_time))
+
 
     '''
     Start SVD Netflix Recommendation System Code:
     '''
-    i = 0
-    for user in data[:, 0]:
-        for rating in data[i]:
-            pass
-        i += 1
-
+    print("Modeling Linear Equation: r_{i,j} = m where m = %f" % movie_matrix_mean)
+    print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f and a_{i} = %f" %(movie_matrix_mean, np.mean(h)))
+    print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f and b_{j} = %f" %(movie_matrix_mean, np.mean(l)))
+    end_time = time.time()
+    print('Total Runtime: %f seconds' % (end_time - start_time))
 if __name__ == '__main__':
     main(sys.argv)
