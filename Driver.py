@@ -26,7 +26,11 @@ def main(cmd_args):
     '''
     data = np.load(cmd_args[1])
     num_ratings = len(data)
-    num_movies = np.max(data[:, 1], axis=0)
+    # np.unique() Returns the sorted unique elements of the movie vector.
+    num_movies = len(np.unique(data[:, 1]))
+    # ? = np.max(data[:, 1], axis=0) + 1
+    num_users = len(np.unique(data[:, 0]))
+
     start_time = time.time()
     movie_matrix_mean = np.mean(data[:, 2])
     '''
@@ -49,19 +53,30 @@ def main(cmd_args):
     #Why are we adding one here? Is this because the index is zero based?
     num_movies = np.max(data[:, 1], axis=0) + 1
     print('%d movies' % num_movies)
-    #The statement below initializes an np column vector with all zero's
-    h = np.zeros((num_movies, 1))
 
     '''
-    What is the below code doing?
+    Create useful matrices sorted differently for data retrieval.
     '''
+    # Sort Data by movie then user (j then i)
+    index = np.lexsort(data[:, 0:2].T)
+    pv = data[index, :]
+
+    # Sort Data by user then movie (i then j)
+    index = np.lexsort(data[:, 1::-1].T)
+    data = data[index, :]
+
+    '''
+    Column Processing Code:
+    '''
+    #The statement below initializes an np column vector with all zero's
+    h = np.zeros((num_movies, 1))
     k0 = 0
     for j in range(num_movies):
         #print('%5.1f%%' % (100 * j / num_movies), end='\r')
         sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / num_movies))
         #sys.stdout.flush()
         k1 = k0 + 1
-        while k1 < len(data) and data[k1, 1] == j:
+        while k1 < len(pv) and pv[k1, 1] == j:
             k1 += 1
         h[j] = np.mean(data[k0:k1, 2])
         k0 = k1
@@ -78,18 +93,6 @@ def main(cmd_args):
     #print('%d ratings for movie %d' % (h[j], j))
     end_time = time.time()
     print('\nTotal Runtime: %f seconds' % (end_time - start_time))
-
-    '''
-    # Sort Data by movie then user (j then i)
-    index = np.lexsort(data[:, :2].T)
-    data = data[index, :]
-    '''
-
-    '''
-    # Sort Data by user then movie (i then j)
-    index = np.lexsort(data[:, 1::-1].T)
-    data = data[index, :]
-    '''
 
     '''
     Start SVD Netflix Recommendation System Code:
