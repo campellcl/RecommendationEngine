@@ -83,6 +83,8 @@ def main(cmd_args):
         h[j] = np.mean(pu[k0:k1, 2])
         # get the mean rating for a given movie. Some movies are rated higher than others.
         l[j] = np.mean(pv[k0:k1, 2])
+        # print("For user %d: r_{i,j} = m where r_{i,j} = %f, m = %f, and r_{i,j} + m = %f" %(j, pu[j][2], (pu[j][2] + movie_matrix_mean)))
+        # print("For user %d, r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f, and r_{i,j} = %f" %(j, movie_matrix_mean, h[j], l[j], (movie_matrix_mean + h[j] + l[j])))
         k0 = k1
     print("\n")
     #for j in range(num_movies):
@@ -100,10 +102,16 @@ def main(cmd_args):
     '''
     Start SVD Netflix Recommendation System Code:
     '''
+    print("For user A:" )
     print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f" %(movie_matrix_mean, movie_matrix_mean))
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
     print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
+    prediction_matrix = np.zeros((num_movies, 1))
+    for element in prediction_matrix:
+        element = movie_matrix_mea
+    # rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
+    # print("RMSE Model A: %f" %rmse_model_a)
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
 if __name__ == '__main__':
