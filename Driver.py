@@ -81,7 +81,7 @@ def main(cmd_args):
             k1 += 1
         # get the mean rating for a given user. Some users rate higher than others.
         h[j] = np.mean(data[k0:k1, 2])
-        l[j] = pv[k0:k1, 2]
+        l[j] = np.mean(pv[k0:k1, 2])
         k0 = k1
 
     #for j in range(num_movies):
