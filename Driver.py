@@ -63,13 +63,14 @@ def main(cmd_args):
 
     # Sort Data by user then movie (i then j)
     index = np.lexsort(data[:, 1::-1].T)
-    data = data[index, :]
+    pu = data[index, :]
 
     '''
     Column Processing Code:
     '''
     #The statement below initializes an np column vector with all zero's
     h = np.zeros((num_movies, 1))
+    l = np.zeros((num_movies, 1))
     k0 = 0
     for j in range(num_movies):
         #print('%5.1f%%' % (100 * j / num_movies), end='\r')
@@ -78,7 +79,9 @@ def main(cmd_args):
         k1 = k0 + 1
         while k1 < len(pv) and pv[k1, 1] == j:
             k1 += 1
+        # get the mean rating for a given user. Some users rate higher than others.
         h[j] = np.mean(data[k0:k1, 2])
+        l[j] = pv[k0:k1, 2]
         k0 = k1
 
     #for j in range(num_movies):
