@@ -100,9 +100,10 @@ def main(cmd_args):
     '''
     Start SVD Netflix Recommendation System Code:
     '''
-    print("Modeling Linear Equation: r_{i,j} = m where m = %f" % movie_matrix_mean)
-    print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f and a_{i} = %f" %(movie_matrix_mean, np.mean(h)))
-    print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f and b_{j} = %f" %(movie_matrix_mean, np.mean(l)))
+    print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f" %(movie_matrix_mean, movie_matrix_mean))
+    print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
+    print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
+    print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
 if __name__ == '__main__':
