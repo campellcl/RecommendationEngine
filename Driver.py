@@ -86,7 +86,6 @@ def main(cmd_args):
     '''
     Start SVD Netflix Recommendation System Code Validation:
     '''
-    validateLinearModels()
     # linear equation A: r_{i,j} = m
     print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f"
           %(movie_matrix_mean, movie_matrix_mean))
