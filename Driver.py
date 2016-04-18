@@ -91,8 +91,8 @@ def main(cmd_args):
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
     print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
-    prediction_matrix = np.zeros((num_movies, 1))
-    print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), len(num_movies))
+    prediction_matrix = np.zeros((len(data), 1))
+    print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), num_movies))
     np.ndarray.fill(prediction_matrix, movie_matrix_mean)
     rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
     # print("RMSE Model A: %f" %rmse_model_a)
@@ -101,16 +101,16 @@ def main(cmd_args):
     
 def processColumns(data, length):
     h = np.zeros((length, 1))
-	k0 = 0
-	for j in range(length):
-	    sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
-	    k1 = k0 + 1
-	    while k1 < len(data) and data[k1, 1] == j:
-	        k1 += 1
+    k0 = 0
+    for j in range(length):
+        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+        k1 = k0 + 1
+        while k1 < len(data) and data[k1, 1] == j:
+            k1 += 1
         h[j] = np.mean(data[k0:k1, 2])
-	    k0 = k1
-     print("\n")
-	 return h
+        k0 = k1
+    print("\n")
+    return h
 	 
 if __name__ == '__main__':
     main(sys.argv)
