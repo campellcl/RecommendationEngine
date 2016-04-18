@@ -114,7 +114,7 @@ def processColumns(data, length):
             k1 += 1
         h[j] = np.mean(data[k0:k1, 2])
         k0 = k1
-    print("\n")
+    print("\n") 
     return h
 	 
 if __name__ == '__main__':
