@@ -83,20 +83,30 @@ def main(cmd_args):
     #j = np.argmin(h, axis=0)
     #print('%d ratings for movie %d' % (h[j], j))
 
-
     '''
-    Start SVD Netflix Recommendation System Code:
+    Start SVD Netflix Recommendation System Code Validation:
     '''
+    # linear equation A: r_{i,j} = m
     print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f" %(movie_matrix_mean, movie_matrix_mean))
+    # linear equation B: r_{i,j} = m + (a_{i} - m)
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
+    # linear equation C: r_{i,j} = m + (b_{j} - m)
     print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
+    # linear equation D: r_{i,j} = m + (a_{i} - m) + (b_{j} - m)
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
     prediction_matrix = np.zeros((len(data), ))
-    print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), num_movies))
+    # print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), num_movies))
     # prediction_matrix.reshape((-1,)) - data[:,2]
     np.ndarray.fill(prediction_matrix, movie_matrix_mean)
     rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
-    print("RMSE Model A: %f" %rmse_model_a)
+    print("RMSE Model of Linear Equation A: %f" %rmse_model_a)
+    rmse_model_b = None
+    rmse_model_c = None
+    rmse_model_d = None
+
+    print("RMSE Model B: %f" %rmse_model_b)
+    print("RMSE Model C: %f" %rmse_model_c)
+    print("RMSE Model D: %f" %rmse_model_d)
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
     
