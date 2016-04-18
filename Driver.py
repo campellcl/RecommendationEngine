@@ -51,7 +51,7 @@ def main(cmd_args):
     data = data[index, :]
 
     #Why are we adding one here? Is this because the index is zero based?
-    num_movies = np.max(data[:, 1], axis=0) + 1
+    # num_movies = np.max(data[:, 1], axis=0) + 1
     print('%d movies' % num_movies)
 
     '''
@@ -102,15 +102,13 @@ def main(cmd_args):
     '''
     Start SVD Netflix Recommendation System Code:
     '''
-    print("For user A:" )
     print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f" %(movie_matrix_mean, movie_matrix_mean))
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
     print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
     prediction_matrix = np.zeros((num_movies, 1))
-    for element in prediction_matrix:
-        element = movie_matrix_mea
-    # rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
+    np.ndarray.fill(prediction_matrix, movie_matrix_mean)
+    rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
     # print("RMSE Model A: %f" %rmse_model_a)
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
