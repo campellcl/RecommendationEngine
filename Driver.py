@@ -6,7 +6,7 @@
         3. TODO: ??
     @Author: Chris Campell, Chris Chalfant, Travis Clark
     @Date: 4/11/2016
-    @Version: 1.0
+    @Version: 1.5
 """
 from __future__ import print_function
 import numpy as np
@@ -52,7 +52,7 @@ def main(cmd_args):
 
     #Why are we adding one here? Is this because the index is zero based?
     # num_movies = np.max(data[:, 1], axis=0) + 1
-    print('%d movies' % num_movies)
+    print('%d unique movies' % num_movies)
 
     '''
     Create useful matrices sorted differently for data retrieval.
@@ -86,20 +86,26 @@ def main(cmd_args):
     '''
     Start SVD Netflix Recommendation System Code Validation:
     '''
+    validateLinearModels()
     # linear equation A: r_{i,j} = m
-    print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f" %(movie_matrix_mean, movie_matrix_mean))
+    print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f"
+          %(movie_matrix_mean, movie_matrix_mean))
     # linear equation B: r_{i,j} = m + (a_{i} - m)
-    print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
+    print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f"
+          %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
     # linear equation C: r_{i,j} = m + (b_{j} - m)
-    print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
+    print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f"
+          %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
     # linear equation D: r_{i,j} = m + (a_{i} - m) + (b_{j} - m)
-    print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
+    print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f"
+          %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
+
     prediction_matrix = np.zeros((len(data), ))
-    # print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), num_movies))
     # prediction_matrix.reshape((-1,)) - data[:,2]
     np.ndarray.fill(prediction_matrix, movie_matrix_mean)
     rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
-    print("RMSE Model of Linear Equation A: %f" %rmse_model_a)
+    print("RMSE of Linear Model A: %f" %rmse_model_a)
+
     rmse_model_b = None
     rmse_model_c = None
     rmse_model_d = None
@@ -114,7 +120,7 @@ def processColumns(data, length):
     h = np.zeros((length, 1))
     k0 = 0
     for j in range(length):
-        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+        sys.stdout.write('\rProcessing Column Request:%5.2f%%' % (100 * j / length))
         k1 = k0 + 1
         while k1 < len(data) and data[k1, 1] == j:
             k1 += 1
@@ -122,6 +128,6 @@ def processColumns(data, length):
         k0 = k1
     print("\n") 
     return h
-	 
+
 if __name__ == '__main__':
     main(sys.argv)
