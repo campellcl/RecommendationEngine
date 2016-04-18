@@ -91,8 +91,13 @@ def main(cmd_args):
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
     print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
     print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
+<<<<<<< HEAD
     prediction_matrix = np.zeros((len(data), 1))
     print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), num_movies))
+=======
+    prediction_matrix = np.zeros((num_movies, 1))
+    print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), num_movies)
+>>>>>>> origin/master
     np.ndarray.fill(prediction_matrix, movie_matrix_mean)
     rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
     # print("RMSE Model A: %f" %rmse_model_a)
