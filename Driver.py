@@ -69,24 +69,9 @@ def main(cmd_args):
     Column Processing Code:
     '''
     #The statement below initializes an np column vector with all zero's
-    h = np.zeros((num_movies, 1))
-    l = np.zeros((num_movies, 1))
-    k0 = 0
-    for j in range(num_movies):
-        #print('%5.1f%%' % (100 * j / num_movies), end='\r')
-        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / num_movies))
-        #sys.stdout.flush()
-        k1 = k0 + 1
-        while k1 < len(pv) and pv[k1, 1] == j:
-            k1 += 1
-        # get the mean rating for a given user. Some users rate higher than others.
-        h[j] = np.mean(pu[k0:k1, 2])
-        # get the mean rating for a given movie. Some movies are rated higher than others.
-        l[j] = np.mean(pv[k0:k1, 2])
-        # print("For user %d: r_{i,j} = m where r_{i,j} = %f, m = %f, and r_{i,j} + m = %f" %(j, pu[j][2], (pu[j][2] + movie_matrix_mean)))
-        # print("For user %d, r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f, and r_{i,j} = %f" %(j, movie_matrix_mean, h[j], l[j], (movie_matrix_mean + h[j] + l[j])))
-        k0 = k1
-    print("\n")
+    h = processColumns(pv, num_movies)
+    l = processColumns(pu, num_users)
+    
     #for j in range(num_movies):
     #    index = data[:, 1] == j
     #    h[j] = len(data[index, :])
@@ -113,5 +98,19 @@ def main(cmd_args):
     # print("RMSE Model A: %f" %rmse_model_a)
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
+    
+def processColumns(data, length):
+    h = np.zeros((length, 1))
+	k0 = 0
+	for j in range(length):
+	    sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+	    k1 = k0 + 1
+	    while k1 < len(data) and data[k1, 1] == j:
+	        k1 += 1
+        h[j] = np.mean(data[k0:k1, 2])
+	    k0 = k1
+     print("\n")
+	 return h
+	 
 if __name__ == '__main__':
     main(sys.argv)
