@@ -157,6 +157,7 @@ def testAverage(data, pu, pv, mean):
     index = 0
     for x in data:
         h[index] - (pu[x[0]] + pv[x[1]] + mean - x[2])
+        index += 1
     print(h)
     return h
 
