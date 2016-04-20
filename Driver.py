@@ -78,8 +78,8 @@ def main(cmd_args):
     '''
     Column Processing Code:
     '''
-    puA = processMovieColumns(pv, num_movies)
-    pvA = processUserColumns(pu, num_users)
+    puA = processMovieColumns(pv, num_movies, movie_matrix_mean)
+    pvA = processUserColumns(pu, num_users, movie_matrix_mean)
     
     #for j in range(num_movies):
     #    index = data[:, 1] == j
@@ -136,34 +136,18 @@ def main(cmd_args):
     '''
     # TODO: PCA
 
-def processUserColumns(sortedUserMatrix, num_users):
-    h = np.zeros((num_users, ))
-    k0 = 0
-    for j in range(num_users):
-        sys.stdout.write('\rProcessing Column Request <User>: %5.2f%%' % (100 * j / num_users))
-        k1 = k0 + 1
-        while k1 < len(sortedUserMatrix) and sortedUserMatrix[k1, 1] == j:
-            k1 += 1
-        h[j] = np.mean(sortedUserMatrix[k0:k1, 2]) - np.mean(sortedUserMatrix[:, 2])
-        k0 = k1
-    print("\n")
-    return h
-    # a_{0} = mean(user_0) - M
-    # b_{0} = mean(movie_0) - M
-    # r_{i,j} = a_0 + b_0
-
-def processMovieColumns(sortedMovieMatrix, num_movies):
-    h = np.zeros((num_movies, ))
-    k0 = 0
-    for j in range(num_movies):
-        sys.stdout.write('\rProcessing Column Request <Movie>: %5.2f%%' % (100 * j / num_movies))
-        k1 = k0 + 1
-        while k1 < len(sortedMovieMatrix) and sortedMovieMatrix[k1, 1] == j:
-            k1 += 1
-        h[j] = np.mean(sortedMovieMatrix[k0:k1, 2]) - np.mean(sortedMovieMatrix[:, 2])
-        k0 = k1
-    print("\n")
-    return h
+def processColumns(data, length, mean):
+    h = np.zeros((length, 1))
+	k0 = 0
+	for j in range(length):
+	    sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+	    k1 = k0 + 1
+	    while k1 < len(data) and data[k1, 1] == j:
+	        k1 += 1
+        h[j] = np.mean(data[k0:k1, 2]) - mean
+	    k0 = k1
+     print("\n")
+	 return h
 
 def testAverage(data, pu):
     num_users = len(np.unique(pu[:, 0]))
