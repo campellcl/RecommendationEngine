@@ -138,16 +138,16 @@ def main(cmd_args):
 
 def processColumns(data, length, mean):
     h = np.zeros((length, 1))
-	k0 = 0
-	for j in range(length):
-	    sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
-	    k1 = k0 + 1
-	    while k1 < len(data) and data[k1, 1] == j:
-	        k1 += 1
+    k0 = 0
+    for j in range(length):
+        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+        k1 = k0 + 1
+        while k1 < len(data) and data[k1, 1] == j:
+             k1 += 1
         h[j] = np.mean(data[k0:k1, 2]) - mean
-	    k0 = k1
-     print("\n")
-	 return h
+        k0 = k1
+    print("\n")
+    return h
 
 def testAverage(data, pu):
     num_users = len(np.unique(pu[:, 0]))
