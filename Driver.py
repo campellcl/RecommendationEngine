@@ -12,6 +12,8 @@ from __future__ import print_function
 import numpy as np
 import sys
 import time
+import pandas as pd
+import statsmodels.formula.api as smf
 
 
 '''
@@ -33,6 +35,14 @@ def main(cmd_args):
 
     start_time = time.time()
     movie_matrix_mean = np.mean(data[:, 2])
+    '''
+    data = {'user': data[:, 0], 'movie': data[:, 1], 'rating': data[:, 2]}
+    df = pd.DataFrame(data=data)
+    formula = 'rating~1+C(user)+C(movie)'
+    model = smf.ols(formula = formula, data = df)
+    result = model.fit()
+    '''
+
     '''
     m = 0
     for row in data:
@@ -68,9 +78,8 @@ def main(cmd_args):
     '''
     Column Processing Code:
     '''
-    #The statement below initializes an np column vector with all zero's
-    h = processColumns(pv, num_movies)
-    l = processColumns(pu, num_users)
+    puA = processMovieColumns(pv, num_movies)
+    pvA = processUserColumns(pu, num_users)
     
     #for j in range(num_movies):
     #    index = data[:, 1] == j
@@ -90,14 +99,14 @@ def main(cmd_args):
     print("Modeling Linear Equation A: r_{i,j} = m where m = %f and r_{i,j} = %f"
           %(movie_matrix_mean, movie_matrix_mean))
     # linear equation B: r_{i,j} = m + (a_{i} - m)
-    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f"
-          %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
+    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, and a_{i} = %f"
+          %(movie_matrix_mean, np.mean(puA)))
     # linear equation C: r_{i,j} = m + (b_{j} - m)
-    print("Modeling Linear Equation C: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f"
-          %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
+    print("Modeling Linear Equation C: r_{i,j} = m + b_{j} where m = %f, and b_{j} = %f"
+          %(movie_matrix_mean, np.mean(pvA)))
     # linear equation D: r_{i,j} = m + (a_{i} - m) + (b_{j} - m)
-    print("Modeling Linear Equation D: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f"
-          %(movie_matrix_mean, np.mean(h), np.mean(l), ((np.mean(l) - movie_matrix_mean) + (np.mean(h) - movie_matrix_mean))))
+    print("Modeling Linear Equation D: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, and b_{j} = %f"
+          %(movie_matrix_mean, np.mean(puA), np.mean(pvA)))
 
     prediction_matrix = np.zeros((len(data), ))
     # prediction_matrix.reshape((-1,)) - data[:,2]
@@ -106,7 +115,7 @@ def main(cmd_args):
     print("RMSE of Linear Model A: %f" %rmse_model_a)
 
     prediction_matrix = np.zeros((len(data), ))
-    np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(l) - movie_matrix_mean)))
+    prediction_matrix = puA
     rmse_model_b = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
     print("RMSE of Linear Model B: %f" %rmse_model_b)
 
@@ -125,17 +134,48 @@ def main(cmd_args):
     '''
     Begin Principle Component Analysis (PCA):
     '''
+    # TODO: PCA
 
-
-def processColumns(data, length):
-    h = np.zeros((length, 1))
+def processUserColumns(sortedUserMatrix, num_users):
+    h = np.zeros((num_users, ))
     k0 = 0
-    for j in range(length):
-        sys.stdout.write('\rProcessing Column Request:%5.2f%%' % (100 * j / length))
+    for j in range(num_users):
+        sys.stdout.write('\rProcessing Column Request <User>: %5.2f%%' % (100 * j / num_users))
+        k1 = k0 + 1
+        while k1 < len(sortedUserMatrix) and sortedUserMatrix[k1, 1] == j:
+            k1 += 1
+        h[j] = np.mean(sortedUserMatrix[k0:k1, 2]) - np.mean(sortedUserMatrix[:, 2])
+        k0 = k1
+    print("\n")
+    return h
+    # a_{0} = mean(user_0) - M
+    # b_{0} = mean(movie_0) - M
+    # r_{i,j} = a_0 + b_0
+
+def processMovieColumns(sortedMovieMatrix, num_movies):
+    h = np.zeros((num_movies, ))
+    k0 = 0
+    for j in range(num_movies):
+        sys.stdout.write('\rProcessing Column Request <Movie>: %5.2f%%' % (100 * j / num_movies))
+        k1 = k0 + 1
+        while k1 < len(sortedMovieMatrix) and sortedMovieMatrix[k1, 1] == j:
+            k1 += 1
+        h[j] = np.mean(sortedMovieMatrix[k0:k1, 2]) - np.mean(sortedMovieMatrix[:, 2])
+        k0 = k1
+    print("\n")
+    return h
+
+def testAverage(data, pu):
+    num_users = len(np.unique(pu[:, 0]))
+    num_movies_user_rated = 0
+    h = np.zeros((num_users, 1))
+    k0 = 0
+    for j in range(num_users):
         k1 = k0 + 1
         while k1 < len(data) and data[k1, 1] == j:
             k1 += 1
-        h[j] = np.mean(data[k0:k1, 2])
+        h[j] = np.mean(data[k0:k1, 2]) - np.mean(data[:, 2])
+        user_mean = np.mean(pu[k0:k1, 2])
         k0 = k1
     print("\n")
     return h
