@@ -153,7 +153,7 @@ def processColumns(data, length, mean):
 
 def testAverage(data, pu, pv, mean):
     print("running tests")
-     h = np.zeros((len(data),))
+    h = np.zeros((len(data),))
     index = 0
     for x in data:
         h[index] - (pu[x[0]] + pv[x[1]] + mean - x[2])
