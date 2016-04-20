@@ -52,7 +52,7 @@ def main(cmd_args):
 
     #Why are we adding one here? Is this because the index is zero based?
     # num_movies = np.max(data[:, 1], axis=0) + 1
-    print('%d movies' % num_movies)
+    print('%d unique movies' % num_movies)
 
     '''
     Create useful matrices sorted differently for data retrieval.
@@ -68,25 +68,9 @@ def main(cmd_args):
     '''
     Column Processing Code:
     '''
-    #The statement below initializes an np column vector with all zero's
-    h = np.zeros((num_movies, 1))
-    l = np.zeros((num_movies, 1))
-    k0 = 0
-    for j in range(num_movies):
-        #print('%5.1f%%' % (100 * j / num_movies), end='\r')
-        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / num_movies))
-        #sys.stdout.flush()
-        k1 = k0 + 1
-        while k1 < len(pv) and pv[k1, 1] == j:
-            k1 += 1
-        # get the mean rating for a given user. Some users rate higher than others.
-        h[j] = np.mean(pu[k0:k1, 2])
-        # get the mean rating for a given movie. Some movies are rated higher than others.
-        l[j] = np.mean(pv[k0:k1, 2])
-        # print("For user %d: r_{i,j} = m where r_{i,j} = %f, m = %f, and r_{i,j} + m = %f" %(j, pu[j][2], (pu[j][2] + movie_matrix_mean)))
-        # print("For user %d, r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f, and r_{i,j} = %f" %(j, movie_matrix_mean, h[j], l[j], (movie_matrix_mean + h[j] + l[j])))
-        k0 = k1
-    print("\n")
+    puA = processColumns(pv, num_movies, movie_matrix_mean)
+    pvA = processColumns(pu, num_users, movie_matrix_mean)
+
     #for j in range(num_movies):
     #    index = data[:, 1] == j
     #    h[j] = len(data[index, :])
@@ -98,21 +82,67 @@ def main(cmd_args):
     #j = np.argmin(h, axis=0)
     #print('%d ratings for movie %d' % (h[j], j))
 
+    '''
+    Start SVD Netflix Recommendation System Code Validation:
+    '''
+    # linear equation A: r_{i,j} = m
+    print("Modeling Linear Equation A: r_{i,j} = m where m = %f and r_{i,j} = %f"
+        %(movie_matrix_mean, movie_matrix_mean))
+    # linear equation B: r_{i,j} = m + (a_{i} - m)
+    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, and a_{i} = %f"
+          %(movie_matrix_mean, np.mean(puA)))
+    # linear equation C: r_{i,j} = m + (b_{j} - m)
+    print("Modeling Linear Equation C: r_{i,j} = m + b_{j} where m = %f, and b_{j} = %f"
+          %(movie_matrix_mean, np.mean(pvA)))
+    # linear equation D: r_{i,j} = m + (a_{i} - m) + (b_{j} - m)
+    print("Modeling Linear Equation D: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, and b_{j} = %f"
+          %(movie_matrix_mean, np.mean(puA), np.mean(pvA)))
 
-    '''
-    Start SVD Netflix Recommendation System Code:
-    '''
-    print("Modeling Linear Equation: r_{i,j} = m where m = %f and r_{i,j} = %f" %(movie_matrix_mean, movie_matrix_mean))
-    print("Modeling Linear Equation: r_{i,j} = m + a_{i} where m = %f, a_{i} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), (movie_matrix_mean + np.mean(h))))
-    print("Modeling Linear Equation: r_{i,j} = m + b_{j} where m = %f, b_{j} = %f, and r_{i,j} = %f" %(movie_matrix_mean, np.mean(l), (movie_matrix_mean + np.mean(l))))
-    print("Modeling Linear Equation: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, b_{j} = %f and r_{i,j} = %f" %(movie_matrix_mean, np.mean(h), np.mean(l), (movie_matrix_mean + np.mean(h) + np.mean(l))))
-    prediction_matrix = np.zeros((num_movies, 1))
-    print("Size of prediction_matrix: %d and Size of num_movies: %d" %(len(prediction_matrix), len(num_movies)))
+    prediction_matrix = np.zeros((len(data), ))
+    # prediction_matrix.reshape((-1,)) - data[:,2]
     np.ndarray.fill(prediction_matrix, movie_matrix_mean)
     rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
-    # print("RMSE Model A: %f" %rmse_model_a)
+    print("RMSE of Linear Model A: %f" %rmse_model_a)
+
+    prediction_matrix = np.zeros((len(data), ))
+    prediction_matrix = puA
+    rmse_model_b = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
+    print("RMSE of Linear Model B: %f" %rmse_model_b)
+
+    prediction_matrix = np.zeros((len(data), ))
+    np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(h) - movie_matrix_mean)))
+    rmse_model_c = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
+    print("RMSE of Linear Model C: %f" %rmse_model_c)
+
+    prediction_matrix = np.zeros((len(data), ))
+    np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(l) - movie_matrix_mean) + (np.mean(h) - movie_matrix_mean)))
+    rmse_model_d = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
+    print("RMSE of Linear Model D: %f" %rmse_model_d)
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
+
+def processColumns(data, length, mean):
+    h = np.zeros((length,))
+    k0 = 0
+    for j in range(length):
+        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+        k1 = k0 + 1
+        while k1 < len(data) and data[k1, 1] == j:
+             k1 += 1
+        h[j] = np.mean(data[k0:k1, 2]) - mean
+        k0 = k1
+    print("\n")
+    return h
+
+def testAverage(data, puA, pvA, mean):
+    print("running tests")
+    h = np.zeros((len(data),))
+    index = 0
+    for x in data:
+        h[index] - (puA[x[0]] + pvA[x[1]] + mean - x[2])
+        index += 1
+    print(h)
+    return h
 
 if __name__ == '__main__':
     main(sys.argv)
