@@ -78,8 +78,10 @@ def main(cmd_args):
     '''
     Column Processing Code:
     '''
-    puA = processMovieColumns(pv, num_movies, movie_matrix_mean)
-    pvA = processUserColumns(pu, num_users, movie_matrix_mean)
+    puA = processColumns(pv, num_movies, movie_matrix_mean)
+    pvA = processColumns(pu, num_users, movie_matrix_mean)
+    testAverage(data, puA, pvA, movie_matrix_mean)
+    
     
     #for j in range(num_movies):
     #    index = data[:, 1] == j
@@ -137,7 +139,7 @@ def main(cmd_args):
     # TODO: PCA
 
 def processColumns(data, length, mean):
-    h = np.zeros((length, 1))
+    h = np.zeros((length,))
     k0 = 0
     for j in range(length):
         sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
@@ -149,19 +151,13 @@ def processColumns(data, length, mean):
     print("\n")
     return h
 
-def testAverage(data, pu):
-    num_users = len(np.unique(pu[:, 0]))
-    num_movies_user_rated = 0
-    h = np.zeros((num_users, 1))
-    k0 = 0
-    for j in range(num_users):
-        k1 = k0 + 1
-        while k1 < len(data) and data[k1, 1] == j:
-            k1 += 1
-        h[j] = np.mean(data[k0:k1, 2]) - np.mean(data[:, 2])
-        user_mean = np.mean(pu[k0:k1, 2])
-        k0 = k1
-    print("\n")
+def testAverage(data, pu, pv, mean):
+    print("running tests")
+     h = np.zeros((len(data),))
+    index = 0
+    for x in data:
+        h[index] - (pu[x[0]] + pv[x[1]] + mean - x[2])
+    print(h)
     return h
 
 if __name__ == '__main__':
