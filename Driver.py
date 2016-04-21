@@ -91,7 +91,7 @@ def main(cmd_args):
     print("Modeling Linear Equation A: r_{i,j} = m where m = %f and r_{i,j} = %f"
         %(movie_matrix_mean, movie_matrix_mean))
     # linear equation B: r_{i,j} = m + (a_{i} - m)
-    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, and a_{i} = %f"
+    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, and a = %f"
           %(movie_matrix_mean, np.mean(puA)))
     # linear equation C: r_{i,j} = m + (b_{j} - m)
     print("Modeling Linear Equation C: r_{i,j} = m + b_{j} where m = %f, and b_{j} = %f"
@@ -106,14 +106,10 @@ def main(cmd_args):
     rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
     print("RMSE of Linear Model A: %f" %rmse_model_a)
 
-    user_rmse = testModelB(puA, test)
-    rmse_model_b =
-    # rmse_model_b = np.sqrt(np.mean((prediction_matrix - test[:, 2]) ** 2))
-    print("RMSE of Linear Model B: %f" %np.nanmean(user_rmse))
+    rmse_model_b = testModelB(puA, movie_matrix_mean, test)
+    print("RMSE of Linear Model B: %f" %rmse_model_b)
 
-    prediction_matrix = np.zeros((len(data), ))
-    np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(h) - movie_matrix_mean)))
-    rmse_model_c = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
+    rmse_model_c = testModelC(pvA, movie_matrix_mean, test)
     print("RMSE of Linear Model C: %f" %rmse_model_c)
 
     prediction_matrix = np.zeros((len(data), ))
@@ -124,7 +120,34 @@ def main(cmd_args):
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
 
-def testModelB(prediction_matrix, test):
+def testModelB(preference_matrix, movie_matrix_mean, test):
+    prediction_matrix = np.zeros((len(test), ))
+    #test_data base index:
+    a0 = 0
+    for j in range(len(test)):
+        sys.stdout.write('\rTesting Model B: %5.1f%%' % (100 * j / len(test)))
+        a1 = a0 + 1
+        while a1 < len(test) and test[a1, 0] == j:
+            a1 += 1
+        prediction_matrix[j] = preference_matrix[test[a1, 0]] + movie_matrix_mean
+        a0 = a1
+    return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
+
+def testModelC(movie_weights, movie_matrix_mean, test):
+    prediction_matrix = np.zeros((len(test), ))
+    # test data base index:
+    a0 = 0
+    for j in range(len(test)):
+        sys.stdout.write('\rTesting Model C: %5.1f%%' % (100 * j / len(test)))
+        a1 = a0 + 1
+        while a1 < len(test) and test[a1, 0] == j:
+            a1 += 1
+        prediction_matrix[j] = movie_weights[test[a1, 0]] + movie_matrix_mean
+        a0 = a1
+    return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
+
+
+def testModelBAdvanced(prediction_matrix, test):
     length_prediction = len(prediction_matrix)
     rmse_user_matrix = np.zeros((length_prediction, ))
     #predicted base index:
@@ -145,6 +168,20 @@ def testModelB(prediction_matrix, test):
             a0 = a1
     return rmse_user_matrix
 
+def processUserColumns(sorted_user_data, movie_matrix_mean):
+    length = len(sorted_user_data)
+    h = np.zeros((length, ))
+    k0 = 0
+    for j in range(length):
+        sys.stdout.write('\rTraining User Data: %5.1f%%' % (100 * j / length))
+        k1 = k0 + 1
+        while k1 < length and sorted_user_data[k1, 1] == j:
+            k1 += 1
+        h[j] = np.mean(sorted_user_data[k0:k1, 2]) - movie_matrix_mean
+        k0 = k1
+    print("\n")
+    return h
+
 def processColumns(data, length, mean):
     h = np.zeros((length,))
     k0 = 0
@@ -153,7 +190,7 @@ def processColumns(data, length, mean):
         k1 = k0 + 1
         while k1 < len(data) and data[k1, 1] == j:
              k1 += 1
-        h[j] = np.mean(data[k0:k1, 2])
+        h[j] = np.mean(data[k0:k1, 2]) - mean
         k0 = k1
     print("\n")
     return h
@@ -163,9 +200,8 @@ def testAverage(data, puA, pvA, mean):
     h = np.zeros((len(data),))
     index = 0
     for x in data:
-        h[index] - (puA[x[0]] + pvA[x[1]] + mean - x[2])
+        h[index] = (puA[x[0]] + pvA[x[1]] + mean - x[2])
         index += 1
-    print(h)
     return h
 
 if __name__ == '__main__':
