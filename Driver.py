@@ -4,9 +4,9 @@
         1. The name of the .npy file containing data for training.
         2. The name of the .npy file containing test data for cross validation.
         3. TODO: ??
-    @Author: Chris Campell, Chris Chalfant, Travis Clark
+    @Author: Chris Campell
     @Date: 4/11/2016
-    @Version: 1.0
+    @Version: 1.75
 """
 from __future__ import print_function
 import numpy as np
@@ -25,14 +25,16 @@ def main(cmd_args):
     20733920 rows.
     '''
     data = np.load(cmd_args[1])
+    test = np.load(cmd_args[2])
+
     num_ratings = len(data)
     # np.unique() Returns the sorted unique elements of the movie vector.
     num_movies = len(np.unique(data[:, 1]))
     # ? = np.max(data[:, 1], axis=0) + 1
     num_users = len(np.unique(data[:, 0]))
+    movie_matrix_mean = np.mean(data[:, 2])
 
     start_time = time.time()
-    movie_matrix_mean = np.mean(data[:, 2])
     '''
     m = 0
     for row in data:
@@ -68,8 +70,8 @@ def main(cmd_args):
     '''
     Column Processing Code:
     '''
-    puA = processColumns(pv, num_movies, movie_matrix_mean)
-    pvA = processColumns(pu, num_users, movie_matrix_mean)
+    pvA = processColumns(pv, num_movies, movie_matrix_mean)
+    puA = processColumns(pu, num_users, movie_matrix_mean)
 
     #for j in range(num_movies):
     #    index = data[:, 1] == j
@@ -101,13 +103,13 @@ def main(cmd_args):
     prediction_matrix = np.zeros((len(data), ))
     # prediction_matrix.reshape((-1,)) - data[:,2]
     np.ndarray.fill(prediction_matrix, movie_matrix_mean)
-    rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:,2]) ** 2))
+    rmse_model_a = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
     print("RMSE of Linear Model A: %f" %rmse_model_a)
 
-    prediction_matrix = np.zeros((len(data), ))
-    prediction_matrix = puA
-    rmse_model_b = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
-    print("RMSE of Linear Model B: %f" %rmse_model_b)
+    user_rmse = testModelB(puA, test)
+    rmse_model_b =
+    # rmse_model_b = np.sqrt(np.mean((prediction_matrix - test[:, 2]) ** 2))
+    print("RMSE of Linear Model B: %f" %np.nanmean(user_rmse))
 
     prediction_matrix = np.zeros((len(data), ))
     np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(h) - movie_matrix_mean)))
@@ -118,18 +120,40 @@ def main(cmd_args):
     np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(l) - movie_matrix_mean) + (np.mean(h) - movie_matrix_mean)))
     rmse_model_d = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
     print("RMSE of Linear Model D: %f" %rmse_model_d)
+
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
+
+def testModelB(prediction_matrix, test):
+    length_prediction = len(prediction_matrix)
+    rmse_user_matrix = np.zeros((length_prediction, ))
+    #predicted base index:
+    p0 = 0
+    #actual base index:
+    a0 = 0
+    for j in range(length_prediction):
+        sys.stdout.write('\rTesting: %5.1f%%' % (100 * j / length_prediction))
+        a1 = a0 + 1
+        while a1 < len(test) and test[a1, 0] == j:
+            a1 += 1
+        if (test[:, 0][j] != j):
+            # The user is not in the test data. RMSE for user not possible.
+            rmse_user_matrix[j] = np.NaN
+        else:
+            mean_actual_user_rating = np.mean(test[a0:a1, 2])
+            rmse_user_matrix[j] = np.sqrt(np.mean((prediction_matrix[j] - mean_actual_user_rating) ** 2))
+            a0 = a1
+    return rmse_user_matrix
 
 def processColumns(data, length, mean):
     h = np.zeros((length,))
     k0 = 0
     for j in range(length):
-        sys.stdout.write('\rLoading:%5.1f%%' % (100 * j / length))
+        sys.stdout.write('\rTraining: %5.1f%%' % (100 * j / length))
         k1 = k0 + 1
         while k1 < len(data) and data[k1, 1] == j:
              k1 += 1
-        h[j] = np.mean(data[k0:k1, 2]) - mean
+        h[j] = np.mean(data[k0:k1, 2])
         k0 = k1
     print("\n")
     return h
