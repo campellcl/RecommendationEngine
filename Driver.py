@@ -24,6 +24,7 @@ def main(cmd_args):
     the second column is the movie index (0-8884), and the third column is the rating (1-5), with a total of
     20733920 rows.
     '''
+    start_time = time.time()
     data = np.load(cmd_args[1])
     test = np.load(cmd_args[2])
 
@@ -34,7 +35,7 @@ def main(cmd_args):
     num_users = len(np.unique(data[:, 0]))
     movie_matrix_mean = np.mean(data[:, 2])
 
-    start_time = time.time()
+
     '''
     m = 0
     for row in data:
@@ -97,24 +98,21 @@ def main(cmd_args):
     print("RMSE of Linear Model A: %f" %rmse_model_a)
 
     # linear equation B: r_{i,j} = m + (a_{i} - m)
-    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, and a = %f"
+    print("Modeling Linear Equation B: r_{i,j} = m + a_{i} where m = %f, and np.mean(a) = %f"
           %(movie_matrix_mean, np.mean(puA)))
     rmse_model_b = testModelB(puA, movie_matrix_mean, test)
     print("RMSE of Linear Model B: %f" %rmse_model_b)
 
     # linear equation C: r_{i,j} = m + (b_{j} - m)
-    print("Modeling Linear Equation C: r_{i,j} = m + b_{j} where m = %f, and b = %f"
+    print("Modeling Linear Equation C: r_{i,j} = m + b_{j} where m = %f, and np.mean(b) = %f"
           %(movie_matrix_mean, np.mean(pvA)))
     rmse_model_c = testModelC(pvA, movie_matrix_mean, test)
     print("RMSE of Linear Model C: %f" %rmse_model_c)
 
     # linear equation D: r_{i,j} = m + (a_{i} - m) + (b_{j} - m)
-    print("Modeling Linear Equation D: r_{i,j} = m + a_{i} + b_{j} where m = %f, a_{i} = %f, and b_{j} = %f"
+    print("Modeling Linear Equation D: r_{i,j} = m + a_{i} + b_{j} where m = %f, np.mean(a) = %f, and np.mean(b) = %f"
           %(movie_matrix_mean, np.mean(puA), np.mean(pvA)))
-
-    prediction_matrix = np.zeros((len(data), ))
-    np.ndarray.fill(prediction_matrix, (movie_matrix_mean + (np.mean(l) - movie_matrix_mean) + (np.mean(h) - movie_matrix_mean)))
-    rmse_model_d = np.sqrt(np.mean((prediction_matrix - data[:, 2]) ** 2))
+    rmse_model_d = testModelD(user_weights=puA, movie_weights=pvA, movie_matrix_mean=movie_matrix_mean, test=test)
     print("RMSE of Linear Model D: %f" %rmse_model_d)
 
     end_time = time.time()
@@ -133,6 +131,7 @@ def testModelB(preference_matrix, movie_matrix_mean, test):
         user_weight = preference_matrix[user_id]
         prediction_matrix[j] = user_weight + movie_matrix_mean
         a0 = a1
+    sys.stdout.flush()
     print("\n")
     return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
 
@@ -145,13 +144,32 @@ def testModelC(movie_weights, movie_matrix_mean, test):
         a1 = a0 + 1
         while a1 < len(test) and test[a1, 0] == j:
             a1 += 1
-        user_id = test[j, 0]
         movie_id = test[j, 1]
-        movie_weight = movie_weights[movie_id]
         prediction_matrix[j] = movie_weights[movie_id] + movie_matrix_mean
         a0 = a1
+    sys.stdout.flush()
     print("\n")
     return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
+
+def testModelD(user_weights, movie_weights, movie_matrix_mean, test):
+    test_data_length = len(test)
+    user_length = len(user_weights)
+    prediction_matrix = np.zeros((test_data_length, ))
+    # test data base index:
+    a0 = 0
+    for j in range(test_data_length):
+        sys.stdout.write('\rTesting Model D: %5.1f%%' % (100 * j / test_data_length))
+        a1 = a0 + 1
+        while a1 < test_data_length and test[a1, 0] == j:
+            a1 += 1
+        user_id = test[j, 0]
+        movie_id = test[j, 1]
+        prediction_matrix[j] = user_weights[user_id] + movie_weights[movie_id] + movie_matrix_mean
+        a0 = a1
+    sys.stdout.flush()
+    print("\n")
+    return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
+
 
 
 def testModelBAdvanced(prediction_matrix, test):
@@ -186,6 +204,7 @@ def processUserColumns(sorted_user_data, movie_matrix_mean):
             k1 += 1
         h[j] = np.mean(sorted_user_data[k0:k1, 2]) - movie_matrix_mean
         k0 = k1
+    sys.stdout.flush()
     print("\n")
     return h
 
@@ -196,9 +215,10 @@ def processColumns(data, length, mean):
         sys.stdout.write('\rTraining: %5.1f%%' % (100 * j / length))
         k1 = k0 + 1
         while k1 < len(data) and data[k1, 1] == j:
-             k1 += 1
+            k1 += 1
         h[j] = np.mean(data[k0:k1, 2]) - mean
         k0 = k1
+    sys.stdout.flush()
     print("\n")
     return h
 
