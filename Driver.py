@@ -118,59 +118,39 @@ def main(cmd_args):
     end_time = time.time()
     print('Total Runtime: %f seconds' % (end_time - start_time))
 
-def testModelB(preference_matrix, movie_matrix_mean, test):
-    prediction_matrix = np.zeros((len(test), ))
-    #test_data base index:
-    a0 = 0
-    for j in range(len(test)):
-        sys.stdout.write('\rTesting Model B: %5.1f%%' % (100 * j / len(test)))
-        a1 = a0 + 1
-        while a1 < len(test) and test[a1, 0] == j:
-            a1 += 1
+def testModelB(user_weights, movie_matrix_mean, test):
+    test_data_length = len(test)
+    prediction_matrix = np.zeros((test_data_length, ))
+    for j in range(test_data_length):
+        sys.stdout.write('\rTesting Model B: %5.1f%%' % (100 * j / test_data_length))
         user_id = test[j, 0]
-        user_weight = preference_matrix[user_id]
-        prediction_matrix[j] = user_weight + movie_matrix_mean
-        a0 = a1
+        prediction_matrix[j] = user_weights[user_id] + movie_matrix_mean
     sys.stdout.flush()
     print("\n")
     return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
 
 def testModelC(movie_weights, movie_matrix_mean, test):
-    prediction_matrix = np.zeros((len(test), ))
-    # test data base index:
-    a0 = 0
-    for j in range(len(test)):
-        sys.stdout.write('\rTesting Model C: %5.1f%%' % (100 * j / len(test)))
-        a1 = a0 + 1
-        while a1 < len(test) and test[a1, 0] == j:
-            a1 += 1
+    test_data_length = len(test)
+    prediction_matrix = np.zeros((test_data_length, ))
+    for j in range(test_data_length):
+        sys.stdout.write('\rTesting Model C: %5.1f%%' % (100 * j / test_data_length))
         movie_id = test[j, 1]
         prediction_matrix[j] = movie_weights[movie_id] + movie_matrix_mean
-        a0 = a1
     sys.stdout.flush()
     print("\n")
     return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
 
 def testModelD(user_weights, movie_weights, movie_matrix_mean, test):
     test_data_length = len(test)
-    user_length = len(user_weights)
     prediction_matrix = np.zeros((test_data_length, ))
-    # test data base index:
-    a0 = 0
     for j in range(test_data_length):
         sys.stdout.write('\rTesting Model D: %5.1f%%' % (100 * j / test_data_length))
-        a1 = a0 + 1
-        while a1 < test_data_length and test[a1, 0] == j:
-            a1 += 1
         user_id = test[j, 0]
         movie_id = test[j, 1]
         prediction_matrix[j] = user_weights[user_id] + movie_weights[movie_id] + movie_matrix_mean
-        a0 = a1
     sys.stdout.flush()
     print("\n")
     return np.sqrt(np.mean((prediction_matrix[:] - test[:, 2]) ** 2))
-
-
 
 def testModelBAdvanced(prediction_matrix, test):
     length_prediction = len(prediction_matrix)
@@ -192,21 +172,6 @@ def testModelBAdvanced(prediction_matrix, test):
             rmse_user_matrix[j] = np.sqrt(np.mean((prediction_matrix[j] - mean_actual_user_rating) ** 2))
             a0 = a1
     return rmse_user_matrix
-
-def processUserColumns(sorted_user_data, movie_matrix_mean):
-    length = len(sorted_user_data)
-    h = np.zeros((length, ))
-    k0 = 0
-    for j in range(length):
-        sys.stdout.write('\rTraining User Data: %5.1f%%' % (100 * j / length))
-        k1 = k0 + 1
-        while k1 < length and sorted_user_data[k1, 1] == j:
-            k1 += 1
-        h[j] = np.mean(sorted_user_data[k0:k1, 2]) - movie_matrix_mean
-        k0 = k1
-    sys.stdout.flush()
-    print("\n")
-    return h
 
 def processColumns(data, length, mean):
     h = np.zeros((length,))
